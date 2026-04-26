@@ -31,79 +31,91 @@ def home():
 
 @app.post("/predict")
 def predict(data: WeatherInput):
-    sample_data = {
-        "Location": data.Location,
+    try:
+        sample_data = {
+            "Location": data.Location,
 
-        "MinTemp": data.Temp9am - 5,
-        "MaxTemp": data.Temp9am + 5,
+            "MinTemp": data.Temp9am - 5,
+            "MaxTemp": data.Temp9am + 5,
 
-        "Rainfall": 0,
-        "Evaporation": 5,
-        "Sunshine": 8,
+            "Rainfall": 0,
+            "Evaporation": 5,
+            "Sunshine": 8,
 
-        "WindGustDir": 3,
-        "WindGustSpeed": 30,
+            "WindGustDir": 3,
+            "WindGustSpeed": 30,
 
-        "WindDir9am": 5,
-        "WindDir3pm": 7,
+            "WindDir9am": 5,
+            "WindDir3pm": 7,
 
-        "WindSpeed9am": 15,
-        "WindSpeed3pm": 20,
+            "WindSpeed9am": 15,
+            "WindSpeed3pm": 20,
 
-        "Humidity9am": data.Humidity9am,
-        "Humidity3pm": max(data.Humidity9am - 20, 0),
+            "Humidity9am": data.Humidity9am,
+            "Humidity3pm": max(data.Humidity9am - 20, 0),
 
-        "Pressure9am": data.Pressure9am,
-        "Pressure3pm": data.Pressure9am - 2,
+            "Pressure9am": data.Pressure9am,
+            "Pressure3pm": data.Pressure9am - 2,
 
-        "Cloud9am": 5,
-        "Cloud3pm": 5,
+            "Cloud9am": 5,
+            "Cloud3pm": 5,
 
-        "Temp9am": data.Temp9am,
-        "Temp3pm": data.Temp9am + 4,
+            "Temp9am": data.Temp9am,
+            "Temp3pm": data.Temp9am + 4,
 
-        "RainToday": data.RainToday
-    }
+            "RainToday": data.RainToday
+        }
 
-    input_df = pd.DataFrame([sample_data])
+        input_df = pd.DataFrame([sample_data])
 
-    prediction = model.predict(input_df)
+        print("Columns Sent to Model:")
+        print(input_df.columns)
 
-    if prediction[0] == 1:
-        result = "Rain Tomorrow ☔"
-    else:
-        result = "No Rain Tomorrow ☀"
+        print("Input Data:")
+        print(input_df)
 
-    # Save prediction to database
-    conn = sqlite3.connect("weather.db")
-    cursor = conn.cursor()
+        prediction = model.predict(input_df)
 
-    cursor.execute("""
-        INSERT INTO prediction_history
-        (
-            location,
-            temperature,
-            humidity,
-            pressure,
-            rain_today,
-            prediction
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (
-        data.Location,
-        data.Temp9am,
-        data.Humidity9am,
-        data.Pressure9am,
-        data.RainToday,
-        result
-    ))
+        if prediction[0] == 1:
+            result = "Rain Tomorrow ☔"
+        else:
+            result = "No Rain Tomorrow ☀"
 
-    conn.commit()
-    conn.close()
+        # Save prediction to database
+        conn = sqlite3.connect("weather.db")
+        cursor = conn.cursor()
 
-    return {
-        "prediction": result
-    }
+        cursor.execute("""
+            INSERT INTO prediction_history
+            (
+                location,
+                temperature,
+                humidity,
+                pressure,
+                rain_today,
+                prediction
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            data.Location,
+            data.Temp9am,
+            data.Humidity9am,
+            data.Pressure9am,
+            data.RainToday,
+            result
+        ))
+
+        conn.commit()
+        conn.close()
+
+        return {
+            "prediction": result
+        }
+
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
 
 
 @app.get("/history")
