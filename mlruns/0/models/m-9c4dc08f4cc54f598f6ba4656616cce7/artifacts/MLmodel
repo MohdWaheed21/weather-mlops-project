@@ -1,0 +1,23 @@
+artifact_path: file:C:/waheed/code/weather-mlops-project/mlruns/0/models/m-9c4dc08f4cc54f598f6ba4656616cce7/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.12.7
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-9c4dc08f4cc54f598f6ba4656616cce7
+model_size_bytes: 50774480
+model_uuid: m-9c4dc08f4cc54f598f6ba4656616cce7
+prompts: null
+run_id: e2dd4775c016470f814d98f9ec0aca5f
+utc_time_created: '2026-04-26 12:21:48.533798'
