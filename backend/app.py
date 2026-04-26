@@ -7,7 +7,31 @@ import sqlite3
 
 from backend.schema import WeatherInput
 
+
+def create_table():
+    conn = sqlite3.connect("weather.db")
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS prediction_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            location INTEGER,
+            temperature REAL,
+            humidity REAL,
+            pressure REAL,
+            rain_today INTEGER,
+            prediction TEXT
+        )
+    """)
+
+    conn.commit()
+    conn.close()
+
+
 app = FastAPI()
+
+# Auto-create DB table when app starts
+create_table()
 
 # CORS Fix
 app.add_middleware(
@@ -120,32 +144,38 @@ def predict(data: WeatherInput):
 
 @app.get("/history")
 def get_history():
-    conn = sqlite3.connect("weather.db")
-    cursor = conn.cursor()
+    try:
+        conn = sqlite3.connect("weather.db")
+        cursor = conn.cursor()
 
-    cursor.execute("""
-        SELECT *
-        FROM prediction_history
-        ORDER BY id DESC
-    """)
+        cursor.execute("""
+            SELECT *
+            FROM prediction_history
+            ORDER BY id DESC
+        """)
 
-    rows = cursor.fetchall()
+        rows = cursor.fetchall()
+        conn.close()
 
-    conn.close()
+        history = []
 
-    history = []
+        for row in rows:
+            history.append({
+                "id": row[0],
+                "location": row[1],
+                "temperature": row[2],
+                "humidity": row[3],
+                "pressure": row[4],
+                "rain_today": row[5],
+                "prediction": row[6]
+            })
 
-    for row in rows:
-        history.append({
-            "id": row[0],
-            "location": row[1],
-            "temperature": row[2],
-            "humidity": row[3],
-            "pressure": row[4],
-            "rain_today": row[5],
-            "prediction": row[6]
-        })
+        return {
+            "history": history
+        }
 
-    return {
-        "history": history
-    }
+    except Exception as e:
+        return {
+            "error": str(e)
+        }
+
