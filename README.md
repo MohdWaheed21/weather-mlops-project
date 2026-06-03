@@ -31,7 +31,7 @@ This is not just a notebook project — it is a real-world deployable ML product
 Example:
 
 ```text id="readme01"
-https://weather-dashboard.vercel.app
+[https://weather-dashboard.vercel.app](https://weather-mlops-project.vercel.app/)
 ```
 
 ---
